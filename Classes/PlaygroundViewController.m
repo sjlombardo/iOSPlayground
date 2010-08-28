@@ -7,6 +7,11 @@
 //
 
 #import "PlaygroundViewController.h"
+#include <sys/mount.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 @implementation PlaygroundViewController
 
@@ -15,7 +20,16 @@
 - (IBAction)doWork:(id)sender {
 	NSMutableString *log = [[NSMutableString alloc] initWithString:@"----BEGIN----\n"];
 	
-	[log appendString:@"----END----\n"];
+	int fd = open("./file1", O_RDWR|O_CREAT, 0644);
+	
+	struct statfs fsInfo;
+	if( fstatfs(fd, &fsInfo) != -1 ){
+		[log appendString:[NSString stringWithUTF8String:fsInfo.f_fstypename]];
+	} else {
+		[log appendString:@"Error occurred"];
+	}
+	
+	[log appendString:@"\n----END----"];
 	textView.text = log;	
 	[log release];
 }
